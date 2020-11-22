@@ -16,8 +16,12 @@ set.seed(420)
 my_spdf <- readOGR(dsn="C:/Users/Danie/Desktop/LSOA2011", layer="Lower_Layer_Super_Output_Area__December_2011__EW_BSC_V2")
 spdf_fort <- fortify(my_spdf, region="LSOA11CD")
 setwd("C:/Users/Danie/Desktop/lsoadeprivation/")
+
 IMD <- read.csv(file = 'C:/Users/Danie/Desktop/lsoadeprivation/IMD2019.csv', header=TRUE)
+IODSI <- IMD <- read.csv(file = 'C:/Users/Danie/Desktop/lsoadeprivation/IOD2019SI.csv', header=TRUE)
+colnames(IODSI)[which(names(IODSI) == "ï..LSOA.code..2011.")] <- "LSOA11CD"
 colnames(IMD)[which(names(IMD) == "ï..LSOA.code..2011.")] <- "LSOA11CD"
+
 wiltsIMD <- dplyr::filter(IMD, Local.Authority.District.name..2019. %in% c("Wiltshire"))
 mergeWLT <- merge(spdf_fort,wiltshire, by="id")
 finalWLT <- mergeWLT[order(mergeWLT$order),]
@@ -61,7 +65,14 @@ tm_shape(lsoaswilts) +
   tm_polygons("Index.of.Multiple.Deprivation..IMD..Decile", palette = "viridis", alpha=0.4, n=5, title = "IMD Decile") +
   tm_basemap(leaflet::providers$CartoDB)
 
-tmap_mode("view")
+tmap_mode("plot")
 tm_shape(lsoasNCL) +
   tm_polygons("Index.of.Multiple.Deprivation..IMD..Decile", palette = "viridis", alpha=0.4, n=5, title = "IMD Decile") +
+  tm_basemap(leaflet::providers$CartoDB)
+
+wiltsIODSI <- dplyr::filter(IODSI, Local.Authority.District.name..2019. %in% c("Wiltshire"))
+siwilts <- merge(lsoas, wiltsIODSI, by="LSOA11CD")
+tmap_mode("view")
+tm_shape(siwilts) +
+  tm_polygons("Income.Deprivation.Affecting.Children.Index..IDACI..Decile..where.1.is.most.deprived.10..of.LSOAs.", palette = "viridis", alpha=0.4, n=5, title = "IMD Decile") +
   tm_basemap(leaflet::providers$CartoDB)
